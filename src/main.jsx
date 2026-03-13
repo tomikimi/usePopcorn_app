@@ -1,10 +1,41 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import './index.css'
-import App from './App.jsx'
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
+// import './index.css'
+// import App from './App.jsx'
+// import StarRating from "./StarRating";
+import StarRating2 from "./StarRating2";
 
-createRoot(document.getElementById('root')).render(
+// function Test() {
+//   const [movieRating, setMovieRating] = useState(0);
+//   return (
+//     <>
+//       <div>
+//         <StarRating
+//           color="blue"
+//           maxRating={10}
+//           onSetRating={setMovieRating}
+//         ></StarRating>
+//         <p>This movie was rated {movieRating} stars</p>
+//       </div>
+//     </>
+//   );
+// }
+
+createRoot(document.getElementById("root")).render(
   <StrictMode>
-    <App />
+    <StarRating2 maxRating={5}></StarRating2>
+    {/* <App /> */}
+    {/* <Test></Test>
+    <StarRating
+      maxRating={5}
+      messages={["Terrible", "Bad", "Okay", "Good", "Amazing"]}
+    />
+    <StarRating
+      maxRating={10}
+      size={24}
+      color="red"
+      className="test"
+      defaultRating={3}
+    /> */}
   </StrictMode>,
-)
+);
