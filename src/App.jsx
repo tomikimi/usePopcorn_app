@@ -74,14 +74,21 @@ export default function App() {
     setWatched((watched) => [...watched, movie]);
   }
 
+  function handleDeleteWatched(id) {
+    setWatched((watched) => watched.filter((movie) => movie.imdbID != id));
+  }
+
   useEffect(
     function () {
+      const controller = new AbortController();
+
       async function fetchMovies() {
         try {
           setIsLoading(true);
           setError("");
           const res = await fetch(
             `http://www.omdbapi.com/?apikey=${KEY}&s=${query}`,
+            { signal: controller.signal },
           );
 
           if (res.Ok)
@@ -89,11 +96,15 @@ export default function App() {
 
           const data = await res.json();
           if (data.Response === "False") throw new Error("Movie not Found");
-          console.log(data.Search);
+
           setMovies(data.Search);
+          setError("");
         } catch (error) {
           console.error(error.message);
-          setError(error.message);
+
+          if (error.name !== "AbortError") {
+            setError(error.message);
+          }
         } finally {
           setIsLoading(false);
         }
@@ -107,6 +118,10 @@ export default function App() {
         return;
       }
       fetchMovies();
+
+      return function () {
+        controller.abort();
+      };
     },
     [query],
   );
@@ -145,7 +160,10 @@ export default function App() {
           ) : (
             <>
               <WatchedSummary watched={watched}></WatchedSummary>
-              <WatchedMoviesList watched={watched}></WatchedMoviesList>
+              <WatchedMoviesList
+                watched={watched}
+                onDeleteWatched={handleDeleteWatched}
+              ></WatchedMoviesList>
             </>
           )}
         </Box>
@@ -348,6 +366,19 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatched, watched }) {
     },
     [selectedId],
   );
+
+  useEffect(
+    function () {
+      if (!title) return;
+      document.title = `Movie | ${title}`;
+
+      return function () {
+        document.title = "usePopcorn-App";
+      };
+    },
+    [title],
+  );
+
   return (
     <div className="details">
       {isLoading ? (
@@ -421,11 +452,11 @@ function WatchedSummary({ watched }) {
           </p>
           <p>
             <span>⭐️</span>
-            <span>{avgImdbRating}</span>
+            <span>{avgImdbRating.toFixed(2)}</span>
           </p>
           <p>
             <span>🌟</span>
-            <span>{avgUserRating}</span>
+            <span>{avgUserRating.toFixed(2)}</span>
           </p>
           <p>
             <span>⏳</span>
@@ -437,19 +468,23 @@ function WatchedSummary({ watched }) {
   );
 }
 
-function WatchedMoviesList({ watched }) {
+function WatchedMoviesList({ watched, onDeleteWatched }) {
   return (
     <>
       <ul className="list">
         {watched.map((movie) => (
-          <WatchedMovie movie={movie} key={movie.imdbID}></WatchedMovie>
+          <WatchedMovie
+            movie={movie}
+            key={movie.imdbID}
+            onDeleteWatched={onDeleteWatched}
+          ></WatchedMovie>
         ))}
       </ul>
     </>
   );
 }
 
-function WatchedMovie({ movie }) {
+function WatchedMovie({ movie, onDeleteWatched }) {
   return (
     <>
       <li>
@@ -468,6 +503,13 @@ function WatchedMovie({ movie }) {
             <span>⏳</span>
             <span>{movie.runtime} min</span>
           </p>
+
+          <button
+            className="btn-delete"
+            onClick={() => onDeleteWatched(movie.imdbID)}
+          >
+            X
+          </button>
         </div>
       </li>
     </>
