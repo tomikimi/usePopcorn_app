@@ -67,16 +67,16 @@ export default function App() {
           setIsLoading(true);
           setError("");
           const res = await fetch(
-            `http://www.omdbapi.com/?apikey=${KEY}$s=${query}`,
+            `http://www.omdbapi.com/?apikey=${KEY}&s=${query}`,
           );
 
-          if (res.ok)
+          if (res.Ok)
             throw new Error("Something went wrong while fetching Movies");
 
           const data = await res.json();
           if (data.Response === "False") throw new Error("Movie not Found");
-
-          setMovies(data.search);
+          console.log(data.Search);
+          setMovies(data.Search);
         } catch (error) {
           console.error(error.message);
           setError(error.message);
